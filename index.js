@@ -551,10 +551,12 @@ Pica.prototype.resize = function (from, to, options) {
           return processStages(stages, tmpCanvas, to, opts);
         })
         .finally(() => {
-          // https://bugs.webkit.org/show_bug.cgi?id=195325
-          tmpCanvas.width = 0;
-          tmpCanvas.height = 0;
-          tmpCanvas = null;
+          if (tmpCanvas) {
+            // https://bugs.webkit.org/show_bug.cgi?id=195325
+            tmpCanvas.width = 0;
+            tmpCanvas.height = 0;
+            tmpCanvas = null;
+          }
         });
     };
 
