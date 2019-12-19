@@ -287,6 +287,11 @@ Pica.prototype.resize = function (from, to, options) {
         );
 
         toCtx.putImageData(iData, 0, 0);
+
+        // https://bugs.webkit.org/show_bug.cgi?id=195325
+        tmpCanvas.width = 0;
+        tmpCanvas.height = 0;
+
         iData = tmpCtx = tmpCanvas = toCtx = null;
 
         this.debug('Finished!');
@@ -372,6 +377,11 @@ Pica.prototype.resize = function (from, to, options) {
           this.debug('Get tile pixel data');
 
           srcImageData = tmpCtx.getImageData(0, 0, tile.width, tile.height);
+
+          // https://bugs.webkit.org/show_bug.cgi?id=195325
+          tmpCanvas.width = 0;
+          tmpCanvas.height = 0;
+
           tmpCtx = tmpCanvas = null;
         }
 
@@ -532,13 +542,20 @@ Pica.prototype.resize = function (from, to, options) {
         tmpCanvas.height = toHeight;
       }
 
-      return tileAndResize(from, (isLastStage ? to : tmpCanvas), opts).then(() => {
-        if (isLastStage) return to;
+      return tileAndResize(from, (isLastStage ? to : tmpCanvas), opts)
+        .then(() => {
+          if (isLastStage) return to;
 
-        opts.width = toWidth;
-        opts.height = toHeight;
-        return processStages(stages, tmpCanvas, to, opts);
-      });
+          opts.width = toWidth;
+          opts.height = toHeight;
+          return processStages(stages, tmpCanvas, to, opts);
+        })
+        .finally(() => {
+          // https://bugs.webkit.org/show_bug.cgi?id=195325
+          tmpCanvas.width = 0;
+          tmpCanvas.height = 0;
+          tmpCanvas = null;
+        });
     };
 
 
